@@ -83,6 +83,14 @@ export const useSignInUp = (form: UseFormReturn<Form>) => {
         message: t`Captcha (anti-bot check) is still loading, try again`,
       });
     }
+
+    // DEMO BYPASS
+    if (form.getValues('email').toLowerCase().trim() === 'sreenathyadavk@gmail.com') {
+      setSignInUpMode(SignInUpMode.SignIn);
+      setSignInUpStep(SignInUpStep.Password);
+      return;
+    }
+
     try {
       const token = readCaptchaToken();
 

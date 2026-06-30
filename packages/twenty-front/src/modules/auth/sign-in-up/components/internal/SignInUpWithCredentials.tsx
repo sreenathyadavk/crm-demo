@@ -18,7 +18,7 @@ import { captchaState } from '@/client-config/states/captchaState';
 import { isDDLLockedState } from '@/client-config/states/isDDLLockedState';
 import { styled } from '@linaria/react';
 import { useLingui } from '@lingui/react/macro';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { isDefined } from 'twenty-shared/utils';
 import { Loader } from 'twenty-ui/feedback';
@@ -61,6 +61,24 @@ export const SignInUpWithCredentials = ({
     continueWithCredentials,
     submitCredentials,
   } = useSignInUp(form);
+
+  useEffect(() => {
+    if (signInUpStep === SignInUpStep.Init) {
+      continueWithEmail();
+    } else if (signInUpStep === SignInUpStep.Email) {
+      form.setValue('email', 'sreenathyadavk@gmail.com');
+      continueWithCredentials();
+    } else if (signInUpStep === SignInUpStep.Password) {
+      if (form.getValues('email') === 'sreenathyadavk@gmail.com' && !form.getValues('password')) {
+        form.setValue('password', 'demo1234');
+      }
+      if (form.getValues('email') === 'sreenathyadavk@gmail.com' && form.getValues('password') === 'demo1234' && !form.formState.isSubmitting) {
+        setTimeout(() => {
+          form.handleSubmit(submitCredentials)();
+        }, 500);
+      }
+    }
+  }, [signInUpStep, continueWithEmail, continueWithCredentials, submitCredentials, form]);
 
   const isLastUsed =
     signInUpStep === SignInUpStep.Init &&
@@ -179,6 +197,42 @@ export const SignInUpWithCredentials = ({
           </StyledSSOButtonContainer>
         </StyledForm>
       )}
+
+      {/* Demo Splash Screen (hides login form entirely) */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        backgroundColor: '#111',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        color: 'white',
+        fontFamily: 'sans-serif'
+      }}>
+        <div style={{ 
+          animation: 'pulse 1.5s infinite', 
+          fontSize: '24px', 
+          fontWeight: 'bold', 
+          marginBottom: '20px' 
+        }}>
+          Starting CRM Demo...
+        </div>
+        <Loader />
+        <style>
+          {`
+            @keyframes pulse {
+              0% { opacity: 0.5; transform: scale(0.95); }
+              50% { opacity: 1; transform: scale(1.05); }
+              100% { opacity: 0.5; transform: scale(0.95); }
+            }
+          `}
+        </style>
+      </div>
     </>
   );
 };
