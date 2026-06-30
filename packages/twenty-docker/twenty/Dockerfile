@@ -44,12 +44,15 @@ COPY ./packages/twenty-shared /app/packages/twenty-shared
 COPY ./packages/twenty-client-sdk /app/packages/twenty-client-sdk
 COPY ./packages/twenty-server /app/packages/twenty-server
 
-RUN npx nx run twenty-server:lingui:extract && \
-    npx nx run twenty-server:lingui:compile && \
-    npx nx run twenty-emails:lingui:extract && \
-    npx nx run twenty-emails:lingui:compile
-
-RUN npx nx run twenty-server:build
+RUN if [ -d /app/packages/twenty-server/dist ]; then \
+      echo "Using pre-built server from host"; \
+    else \
+      npx nx run twenty-server:lingui:extract && \
+      npx nx run twenty-server:lingui:compile && \
+      npx nx run twenty-emails:lingui:extract && \
+      npx nx run twenty-emails:lingui:compile && \
+      npx nx run twenty-server:build; \
+    fi
 
 # Clean server build output (type declarations and compiled tests are not needed at runtime;
 # source maps are kept because twenty-infra extracts them from the image for Sentry uploads)
